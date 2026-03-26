@@ -1,5 +1,7 @@
 package io.github.cursospring.libraryapi.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,5 +29,23 @@ public class DatabaseConfiguration {
         ds.setPassword(password);
         ds.setDriverClassName(driver);
         return ds;
+    }
+
+    // @Bean
+    public DataSource hikariDataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setDriverClassName(driver);
+        config.setJdbcUrl(url);
+
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(1);
+        config.setPoolName("library-db-pool");
+        config.setMaxLifetime(600000);
+        config.setConnectionTimeout(100000);
+        config.setConnectionTestQuery("select 1");
+
+        return new HikariDataSource(config);
     }
 }
