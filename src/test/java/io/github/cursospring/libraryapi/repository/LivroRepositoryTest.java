@@ -6,6 +6,7 @@ import io.github.cursospring.libraryapi.model.Livro;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -99,12 +100,16 @@ class LivroRepositoryTest {
         repository.deleteById(id);
     }
 
-    //@Test
-    //void buscarLivrosPorAutor() {
-    //    UUID idAutor = UUID.fromString("a43e45a5-a9ff-486e-9529-9a8e7775d35d");
-    //    Autor autor = autorRepository.findById(idAutor).orElse(null);
-    //
-    //    List<Livro> livros = autor.getLivros();
-    //    System.out.println("Esses são os livros de " + autor.getNome() + ": " + livros);
-    //}
+    @Test
+    @Transactional
+    void buscarLivrosTest() {
+        UUID id = UUID.fromString("cb3b71b2-5373-4469-beff-9fe446006151");
+        Livro livro = repository.findById(id).orElse(null);
+
+        System.out.println("Livro:");
+        System.out.println(livro.getTitulo());
+
+        System.out.println("Autor:");
+        System.out.println(livro.getAutor().getNome());
+    }
 }
