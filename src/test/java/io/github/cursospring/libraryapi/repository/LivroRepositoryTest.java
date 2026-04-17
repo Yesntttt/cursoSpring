@@ -112,4 +112,60 @@ class LivroRepositoryTest {
         System.out.println("Autor:");
         System.out.println(livro.getAutor().getNome());
     }
+
+    @Test
+    void pesquisarPorTituloTest() {
+        List<Livro> lista = repository.findByTitulo("UFO");
+        lista.forEach(System.out::println);
+    }
+
+    @Test
+    void pesquisarPorIsbnTest() {
+        List<Livro> lista = repository.findByIsbn("90887-84874");
+        lista.forEach(System.out::println);
+    }
+
+    @Test
+    void pesquisarPorTituloEPrecoTest() {
+        var preco = BigDecimal.valueOf(330.00);
+        var tituloPesquisa = "Meus 30 anos";
+
+        List<Livro> lista = repository.findByTituloAndPreco(tituloPesquisa, preco);
+        lista.forEach(System.out::println);
+
+    }
+
+    @Test
+    void pesquisarPorTituloOuIsbnTest() {
+        var isbnPesquisa = "90887-84874";
+        var tituloPesquisa = "Meus 30 anos";
+
+        List<Livro> lista = repository.findByTituloOrIsbn(tituloPesquisa, isbnPesquisa);
+        lista.forEach(System.out::println);
+
+    }
+
+    @Test
+    void listarLivrosComQueryJPQLTest() {
+        List<Livro> lista = repository.listarTodosOrdenadoPorTituloAndPreco();
+        lista.forEach(System.out::println);
+    }
+
+    @Test
+    void listarAutoresDosLivrosTest() {
+        var resultado = repository.listarAutoresDosLivros();
+        resultado.forEach(System.out::println);
+    }
+
+    @Test
+    void listarTitulosNaoRepetidosTest() {
+        var resultado = repository.listarNomesDiferentesLivros();
+        resultado.forEach(System.out::println);
+    }
+
+    @Test
+    void listarGenerosAutoresBrasileirosTest() {
+        var resultado = repository.listarGenerosAutoresBrasileiros();
+        resultado.forEach(System.out::println);
+    }
 }
