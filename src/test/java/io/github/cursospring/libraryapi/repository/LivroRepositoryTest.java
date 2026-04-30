@@ -6,6 +6,8 @@ import io.github.cursospring.libraryapi.model.Livro;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -27,12 +29,12 @@ class LivroRepositoryTest {
         Livro livro = new Livro();
         livro.setIsbn("90887-84874");
         livro.setPreco(BigDecimal.valueOf(100));
-        livro.setGenero(GeneroLivro.FICCAO);
-        livro.setTitulo("UFO");
+        livro.setGenero(GeneroLivro.CIENCIA);
+        livro.setTitulo("A ciencia doida");
         livro.setDataPublicacao(LocalDate.of(1980, 1, 2));
 
         Autor autor = autorRepository
-                .findById(UUID.fromString("84fc374f-883e-4c4f-87f5-a1cd4362c353"))
+                .findById(UUID.fromString("248495f2-a0bc-45c5-b298-d18a22ed2bce"))
                 .orElse(null);
 
         livro.setAutor(autor);
@@ -167,5 +169,21 @@ class LivroRepositoryTest {
     void listarGenerosAutoresBrasileirosTest() {
         var resultado = repository.listarGenerosAutoresBrasileiros();
         resultado.forEach(System.out::println);
+    }
+
+    @Test
+    void listarPorGeneroQueryParam() {
+        var lista = repository.findByGenero(GeneroLivro.FICCAO, "dataPublicacao");
+        lista.forEach(System.out::println);
+    }
+
+    @Test
+    void deleteByGeneroTest() {
+        repository.deleteByGenero(GeneroLivro.CIENCIA);
+    }
+
+    @Test
+    void updateDataPublicacaoTest() {
+        repository.updateDataPublicacao(LocalDate.of(2000, 01, 01));
     }
 }
