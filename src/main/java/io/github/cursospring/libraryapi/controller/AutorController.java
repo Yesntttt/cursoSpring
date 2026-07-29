@@ -3,13 +3,13 @@ package io.github.cursospring.libraryapi.controller;
 import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
 import io.github.cursospring.libraryapi.model.Autor;
 import io.github.cursospring.libraryapi.service.AutorService;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +43,8 @@ public class AutorController {
         Optional<Autor> autorOptional = service.obterPorId(idAutor);
         if(autorOptional.isPresent()) {
             Autor autor = autorOptional.get();
-            AutorDTO dto = new AutorDTO(autor.getId(),
+            AutorDTO dto = new AutorDTO(
+                    autor.getId(),
                     autor.getNome(),
                     autor.getDataNascimento(),
                     autor.getNacionalidade());
@@ -51,5 +52,36 @@ public class AutorController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deletar(@PathVariable String id) {
+        var idAutor = UUID.fromString(id);
+        Optional<Autor> autorOptional = service.obterPorId(idAutor);
+
+        if (autorOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        service.deletar(idAutor);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AutorDTO>> pesquisar(
+            @RequestParam(value = "nome", required = false) String nome,
+            @RequestParam(value = "nacionalidade", required = false) String nacionalidade) {
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .body(service.pesquisar(nome, nacionalidade));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<AutorDTO> atualizar(@PathVariable String id, @RequestBody AutorDTO dto) {
+        var idAutor = UUID.fromString(id);
+        service.atualizar(idAutor, dto);
+
+        return ResponseEntity.ok().build();
     }
 }
