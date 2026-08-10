@@ -3,6 +3,7 @@ package io.github.cursospring.libraryapi.service;
 import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
 import io.github.cursospring.libraryapi.model.Autor;
 import io.github.cursospring.libraryapi.repository.AutorRepository;
+import io.github.cursospring.libraryapi.validator.AutorValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +15,15 @@ public class AutorService {
 
     private final AutorRepository repository;
 
-    public AutorService(AutorRepository autorRepository) {
+    private final AutorValidator validator;
+
+    public AutorService(AutorRepository autorRepository, AutorValidator autorValidator) {
         this.repository = autorRepository;
+        this.validator = autorValidator;
     }
 
     public Autor salvar(Autor autor) {
+        validator.validar(autor);
         return repository.save(autor);
     }
 
@@ -27,7 +32,7 @@ public class AutorService {
     }
 
     public void deletar(UUID id) {
-        Autor autor = repository.findById(id)
+        repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Autor não encontrado!"));
     }
 
@@ -50,6 +55,8 @@ public class AutorService {
         autor.setNome(dto.nome());
         autor.setDataNascimento(dto.dataNascimento());
         autor.setNacionalidade(dto.nacionalidade());
+
+        validator.validar(autor);
 
         repository.save(autor);
     }

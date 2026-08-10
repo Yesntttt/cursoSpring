@@ -1,6 +1,8 @@
 package io.github.cursospring.libraryapi.controller;
 
 import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
+import io.github.cursospring.libraryapi.controller.dto.ErroResposta;
+import io.github.cursospring.libraryapi.exceptions.RegistroDuplicadoException;
 import io.github.cursospring.libraryapi.model.Autor;
 import io.github.cursospring.libraryapi.service.AutorService;
 import org.springframework.http.HttpStatus;
@@ -25,16 +27,21 @@ public class AutorController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> salvar(@RequestBody AutorDTO autor) {
-        Autor autorEntidade = autor.mapearParaAutor();
-        service.salvar(autorEntidade);
+    public ResponseEntity<Object> salvar(@RequestBody AutorDTO autor) {
+        try {
+            Autor autorEntidade = autor.mapearParaAutor();
+            service.salvar(autorEntidade);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(autorEntidade.getId())
-                .toUri();
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(autorEntidade.getId())
+                    .toUri();
 
-        return ResponseEntity.created(location).build();
+            return ResponseEntity.created(location).build();
+        } catch (RegistroDuplicadoException e) {
+            var erroDTO = ErroResposta.confilito(e.getMessage());
+            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
+        }
     }
 
     @GetMapping("{id}")
@@ -78,10 +85,15 @@ public class AutorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<AutorDTO> atualizar(@PathVariable String id, @RequestBody AutorDTO dto) {
-        var idAutor = UUID.fromString(id);
-        service.atualizar(idAutor, dto);
+    public ResponseEntity<Object> atualizar(@PathVariable String id, @RequestBody AutorDTO dto) {
+        try {
+            var idAutor = UUID.fromString(id);
+            service.atualizar(idAutor, dto);
 
-        return ResponseEntity.ok().build();
+            return ResponseEntity.ok().build();
+        } catch (RegistroDuplicadoException e) {
+            var erroDTO = ErroResposta.confilito(e.getMessage());
+            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
+        }
     }
 }
