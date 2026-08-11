@@ -1,9 +1,12 @@
 package io.github.cursospring.libraryapi.service;
 
 import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
+import io.github.cursospring.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import io.github.cursospring.libraryapi.model.Autor;
 import io.github.cursospring.libraryapi.repository.AutorRepository;
+import io.github.cursospring.libraryapi.repository.LivroRepository;
 import io.github.cursospring.libraryapi.validator.AutorValidator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,16 +14,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AutorService {
 
     private final AutorRepository repository;
-
     private final AutorValidator validator;
-
-    public AutorService(AutorRepository autorRepository, AutorValidator autorValidator) {
-        this.repository = autorRepository;
-        this.validator = autorValidator;
-    }
+    private final LivroRepository livroRepository;
 
     public Autor salvar(Autor autor) {
         validator.validar(autor);
@@ -32,8 +31,16 @@ public class AutorService {
     }
 
     public void deletar(UUID id) {
-        repository.findById(id)
+        Autor autor = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Autor não encontrado!"));
+
+        if(possuiLivro(autor)) {
+            throw new OperacaoNaoPermitidaException(
+                    "Não é permitido deletar um autor que possui um livro."
+            );
+        }
+
+        repository.delete(autor);
     }
 
     public List<AutorDTO> pesquisar(String nome, String nacionalidade) {
@@ -59,5 +66,9 @@ public class AutorService {
         validator.validar(autor);
 
         repository.save(autor);
+    }
+
+    public boolean possuiLivro(Autor autor) {
+        return livroRepository.existsByAutor(autor);
     }
 }

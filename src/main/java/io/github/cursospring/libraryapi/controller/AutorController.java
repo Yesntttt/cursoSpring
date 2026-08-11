@@ -2,9 +2,11 @@ package io.github.cursospring.libraryapi.controller;
 
 import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
 import io.github.cursospring.libraryapi.controller.dto.ErroResposta;
+import io.github.cursospring.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import io.github.cursospring.libraryapi.exceptions.RegistroDuplicadoException;
 import io.github.cursospring.libraryapi.model.Autor;
 import io.github.cursospring.libraryapi.service.AutorService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +19,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("autores")
+@RequiredArgsConstructor
 // http://localhost:8080/autores
 public class AutorController {
 
     private final AutorService service;
-
-    public AutorController(AutorService service) {
-        this.service = service;
-    }
 
     @PostMapping
     public ResponseEntity<Object> salvar(@RequestBody AutorDTO autor) {
@@ -62,17 +61,22 @@ public class AutorController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deletar(@PathVariable String id) {
-        var idAutor = UUID.fromString(id);
-        Optional<Autor> autorOptional = service.obterPorId(idAutor);
+    public ResponseEntity<Object> deletar(@PathVariable String id) {
+        try {
+            var idAutor = UUID.fromString(id);
+            Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-        if (autorOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            if (autorOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            service.deletar(idAutor);
+
+            return ResponseEntity.noContent().build();
+        } catch (OperacaoNaoPermitidaException e) {
+            var erro = ErroResposta.respostaPadrao(e.getMessage());
+            return ResponseEntity.status(erro.status()).body(erro);
         }
-
-        service.deletar(idAutor);
-
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
