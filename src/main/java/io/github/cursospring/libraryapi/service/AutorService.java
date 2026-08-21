@@ -7,6 +7,8 @@ import io.github.cursospring.libraryapi.repository.AutorRepository;
 import io.github.cursospring.libraryapi.repository.LivroRepository;
 import io.github.cursospring.libraryapi.validator.AutorValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,16 +57,24 @@ public class AutorService {
                 .toList();
     }
 
-    public void atualizar(UUID id, AutorDTO dto) {
-        Autor autor = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Autor não encontrado."));
+    public List<Autor> pesquisaByExample(String nome, String nacionalidade) {
+        var autor = new Autor();
+        autor.setNome(nome);
+        autor.setNacionalidade(nacionalidade);
 
-        autor.setNome(dto.nome());
-        autor.setDataNascimento(dto.dataNascimento());
-        autor.setNacionalidade(dto.nacionalidade());
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIgnorePaths("id", "dataCadastro", "dataNascimento")
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+        Example<Autor> autorExample = Example.of(autor, matcher);
 
+        return repository.findAll(autorExample);
+    }
+
+    public void atualizar(Autor autor) {
         validator.validar(autor);
-
         repository.save(autor);
     }
 
