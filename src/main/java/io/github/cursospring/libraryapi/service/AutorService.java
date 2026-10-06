@@ -3,8 +3,10 @@ package io.github.cursospring.libraryapi.service;
 import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
 import io.github.cursospring.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import io.github.cursospring.libraryapi.model.Autor;
+import io.github.cursospring.libraryapi.model.Usuario;
 import io.github.cursospring.libraryapi.repository.AutorRepository;
 import io.github.cursospring.libraryapi.repository.LivroRepository;
+import io.github.cursospring.libraryapi.security.SecurityService;
 import io.github.cursospring.libraryapi.validator.AutorValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
@@ -21,10 +23,13 @@ public class AutorService {
 
     private final AutorRepository repository;
     private final AutorValidator validator;
+    private final SecurityService securityService;
     private final LivroRepository livroRepository;
 
     public Autor salvar(Autor autor) {
         validator.validar(autor);
+        Usuario usuario = securityService.obterUsuarioLogado();
+        autor.setUsuario(usuario);
         return repository.save(autor);
     }
 
