@@ -4,8 +4,13 @@ import io.github.cursospring.libraryapi.controller.dto.AutorDTO;
 import io.github.cursospring.libraryapi.controller.mappers.AutorMapper;
 import io.github.cursospring.libraryapi.model.Autor;
 import io.github.cursospring.libraryapi.service.AutorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("autores")
 @RequiredArgsConstructor
+@Tag(name = "Autor")
+@Slf4j
 public class AutorController implements GenericController {
 
     private final AutorService service;
@@ -26,7 +33,15 @@ public class AutorController implements GenericController {
 
     @PostMapping
     @PreAuthorize("hasRole('GERENTE')")
+    @Operation(summary = "Salvar", description = "Cadastrar um autor")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Autor cadastrado com sucesso."),
+            @ApiResponse(responseCode = "422", description = "Erro de validação."),
+            @ApiResponse(responseCode = "409", description = "Autor já cadastrado no sistema.")
+    })
     public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto) {
+        log.info("Cadastrando autor: {}", dto.nome());
+
         Autor autor = mapper.toEntity(dto);
 
         service.salvar(autor);
@@ -49,6 +64,7 @@ public class AutorController implements GenericController {
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('GERENTE')")
     public ResponseEntity<Void> deletar(@PathVariable String id) {
+        log.info("Deletando autor de ID: {}", id);
 
         var idAutor = UUID.fromString(id);
         Optional<Autor> autorOptional = service.obterPorId(idAutor);
