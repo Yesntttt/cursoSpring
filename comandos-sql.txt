@@ -37,3 +37,15 @@ create table client(
 	redirect_uri varchar(200) not null,
 	scope varchar(50)
 );
+
+insert into usuario
+(id, login, senha, email, roles)
+values
+( uuid_generate_v4(), 'gerente', '$2a$12$0/tx5NF337wiEv6wEuQDTOgzE2n7tKu0U7Yl2H5p1U5X20SKp9kyC'
+, 'gerente@gmail.com', '{GERENTE}');
+
+insert into client
+(id, client_id, client_secret, redirect_uri, scope)
+values
+( uuid_generate_v4(), 'client-production', '$2a$12$fFxsJdscAznbHfqkrG3cQe8FhZREIAgGDJr3/8iDD0kig3ouIXCIS',
+'http://localhost:8080/authorized', 'GERENTE');
